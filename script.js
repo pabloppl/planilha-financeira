@@ -302,7 +302,7 @@ function renderGastos() {
     `).join('');
 }
 
-// INVESTIMENTOS
+// INVESTIMENTOS - LÓGICA CORRIGIDA
 function addInvestimento() {
     const data = document.getElementById('investData').value;
     const valor = parseFloat(document.getElementById('investValor').value);
@@ -314,7 +314,11 @@ function addInvestimento() {
         return;
     }
     
-    const anterior = investimentos.length > 0 ? investimentos[investimentos.length - 1].valor : 0;
+    // MUDANÇA PRINCIPAL: Buscar o último investimento do MESMO TIPO
+    const investimentosMesmoTipo = investimentos.filter(i => i.tipo === tipo);
+    const anterior = investimentosMesmoTipo.length > 0 ? 
+        investimentosMesmoTipo[investimentosMesmoTipo.length - 1].valor : 0;
+    
     const lucro = valor - anterior;
     const percentual = anterior > 0 ? ((lucro / anterior) * 100) : 0;
     
@@ -360,7 +364,17 @@ function editInvest(id) {
         invest.data = newData;
     }
     
-    const anterior = investimentos[investimentos.indexOf(invest) - 1]?.valor || 0;
+    // MUDANÇA: Buscar o investimento anterior do MESMO TIPO (por data)
+    const investimentosMesmoTipo = investimentos
+        .filter(i => i.tipo === invest.tipo && i.id !== invest.id)
+        .sort((a, b) => new Date(a.dataISO) - new Date(b.dataISO));
+    
+    const indexNoTipo = investimentosMesmoTipo.findIndex(i => 
+        new Date(i.dataISO) < new Date(invest.dataISO)
+    );
+    
+    const anterior = indexNoTipo >= 0 ? investimentosMesmoTipo[indexNoTipo].valor : 0;
+    
     invest.valor = parseFloat(newValor);
     invest.descricao = newDesc;
     invest.lucro = invest.valor - anterior;
@@ -496,11 +510,37 @@ function renderCripto() {
     `).join('');
 }
 
-// DASHBOARD
+// DASHBOARD - LÓGICA CORRIGIDA
 function updateDashboard() {
     const totalGastos = gastos.reduce((sum, g) => sum + g.valor, 0);
-    const totalInvest = investimentos.length > 0 ? investimentos[investimentos.length - 1].valor : 0;
-    const totalCripto = criptoInvestimentos.length > 0 ? criptoInvestimentos[criptoInvestimentos.length - 1].valor : 0;
+    
+    // MUDANÇA PRINCIPAL: Somar o valor mais recente de CADA tipo de investimento
+    const tiposInvest = [...new Set(investimentos.map(i => i.tipo))];
+    const totalInvest = tiposInvest.reduce((sum, tipo) => {
+        const investsTipo = investimentos.filter(i => i.tipo === tipo);
+        if (investsTipo.length > 0) {
+            // Pegar o mais recente por data
+            const maisRecente = investsTipo.sort((a, b) => 
+                new Date(b.dataISO) - new Date(a.dataISO)
+            )[0];
+            return sum + maisRecente.valor;
+        }
+        return sum;
+    }, 0);
+    
+    // MUDANÇA: Somar o valor mais recente de CADA criptomoeda
+    const tiposCripto = [...new Set(criptoInvestimentos.map(c => c.tipo))];
+    const totalCripto = tiposCripto.reduce((sum, tipo) => {
+        const criptosTipo = criptoInvestimentos.filter(c => c.tipo === tipo);
+        if (criptosTipo.length > 0) {
+            const maisRecente = criptosTipo.sort((a, b) => 
+                new Date(b.dataISO) - new Date(a.dataISO)
+            )[0];
+            return sum + maisRecente.valor;
+        }
+        return sum;
+    }, 0);
+    
     const patrimonio = totalInvest + totalCripto;
     
     document.getElementById('totalGastos').textContent = formatCurrency(totalGastos);
