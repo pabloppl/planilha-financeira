@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilha Financeira</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Planilha Financeira</h1>
+            <button class="settings-btn" onclick="openSettings()">⚙️</button>
+        </div>
+
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeSettings()">&times;</span>
+                <h2 style="margin-top: 0;">Configurações</h2>
+                
+                <h3 style="color: #8a2be2; font-size: 16px; margin: 20px 0 10px 0;">Escolha o Tema</h3>
+                
+                <div class="theme-option" onclick="changeTheme('dark')" id="theme-dark">
+                    <div class="theme-preview dark"></div>
+                    <div>
+                        <strong>Tema Escuro</strong>
+                        <p style="font-size: 12px; color: #888; margin-top: 5px;">Tema padrão com fundo escuro e roxo</p>
+                    </div>
+                </div>
+                
+                <div class="theme-option" onclick="changeTheme('vibrant')" id="theme-vibrant">
+                    <div class="theme-preview vibrant"></div>
+                    <div>
+                        <strong>Tema Vibrante</strong>
+                        <p style="font-size: 12px; color: #888; margin-top: 5px;">Gradientes coloridos e animados</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="openTab('dashboard')">📊 DASHBOARD</div>
+            <div class="tab" onclick="openTab('gastos')">💰 GASTOS</div>
+            <div class="tab" onclick="openTab('investimentos')">💼 INVESTIMENTOS</div>
+            <div class="tab" onclick="openTab('cripto')">₿ CRIPTOMOEDAS</div>
+            <div class="tab" onclick="openTab('backup')">💾 BACKUP</div>
+        </div>
+
+        <div id="dashboard" class="tab-content active">
+            <h2>Dashboard Financeiro</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Total Gastos</h3>
+                    <div class="value" id="totalGastos">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Investimentos Nubank</h3>
+                    <div class="value" id="totalInvest">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Investimentos Cripto</h3>
+                    <div class="value" id="totalCripto">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Patrimônio Total</h3>
+                    <div class="value" id="patrimonioTotal">R$ 0,00</div>
+                </div>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>Gastos por Categoria</h3>
+                    <canvas id="gastosChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Evolução dos Investimentos</h3>
+                    <canvas id="investChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="gastos" class="tab-content">
+            <h2>Gastos Mensais</h2>
+            <div class="form-section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" id="gastoData">
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" id="gastoDesc" placeholder="Ex: Uber">
+                    </div>
+                    <div class="form-group">
+                        <label>Valor (R$)</label>
+                        <input type="number" id="gastoValor" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="gastoCategoria">
+                            <option value="Lazer">Lazer</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Saúde">Saúde</option>
+                            <option value="Roupa">Roupa</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="addGasto()">Adicionar Gasto</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Descrição</th>
+                        <th>Custo</th>
+                        <th>Categoria</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="gastosTable"></tbody>
+            </table>
+        </div>
+
+        <div id="investimentos" class="tab-content">
+            <h2>Investimentos Nubank</h2>
+            <div class="form-section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" id="investData">
+                    </div>
+                    <div class="form-group">
+                        <label>Valor Investido (R$)</label>
+                        <input type="number" id="investValor" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Investimento</label>
+                        <select id="investTipo">
+                            <option value="Caixinha Normal">Caixinha Normal</option>
+                            <option value="Caixinha Turbo">Caixinha Turbo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <input type="text" id="investDesc" placeholder="Ex: Reserva de emergência">
+                    </div>
+                </div>
+                <button onclick="addInvestimento()">Adicionar Investimento</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Valor Investido (Líquido)</th>
+                        <th>Lucro vs Anterior</th>
+                        <th>% vs Anterior</th>
+                        <th>Descrição</th>
+                        <th>Tipo de Investimento</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="investTable"></tbody>
+            </table>
+        </div>
+
+        <div id="cripto" class="tab-content">
+            <h2>Criptomoedas</h2>
+            
+            <div class="crypto-info">
+                <h3 style="color: #8a2be2; margin-bottom: 15px;">Preços Atuais</h3>
+                <div class="crypto-prices">
+                    <div class="crypto-card">
+                        <div class="crypto-name">Bitcoin (BTC)</div>
+                        <div class="crypto-price" id="btcPrice">Carregando...</div>
+                        <div class="crypto-update" id="btcUpdate"></div>
+                    </div>
+                    <div class="crypto-card">
+                        <div class="crypto-name">Solana (SOL)</div>
+                        <div class="crypto-price" id="solPrice">Carregando...</div>
+                        <div class="crypto-update" id="solUpdate"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert">
+                💡 Os preços são atualizados automaticamente a cada 60 segundos
+            </div>
+
+            <div class="form-section">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data do Investimento</label>
+                        <input type="date" id="criptoData">
+                    </div>
+                    <div class="form-group">
+                        <label>Valor Investido (R$)</label>
+                        <input type="number" id="criptoValor" placeholder="0.00" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label>Criptomoeda</label>
+                        <select id="criptoTipo">
+                            <option value="BTC">Bitcoin (BTC)</option>
+                            <option value="SOL">Solana (SOL)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Lucro vs Anterior</label>
+                        <input type="number" id="criptoLucro" placeholder="0.00" step="0.01">
+                    </div>
+                </div>
+                <button onclick="addCripto()">Adicionar Investimento</button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Valor Investido (Líquido)</th>
+                        <th>Lucro vs Anterior</th>
+                        <th>% vs Anterior</th>
+                        <th>Criptomoeda</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="criptoTable"></tbody>
+            </table>
+        </div>
+
+        <div id="backup" class="tab-content">
+            <h2>Backup e Recuperação</h2>
+            
+            <div class="success-message" id="successMessage"></div>
+
+            <div class="backup-section">
+                <h3>📥 Exportar Dados</h3>
+                <p style="width: 100%; color: #aaa; margin-bottom: 10px;">Baixe todos os seus dados em formato JSON para fazer backup.</p>
+                <button class="btn-export" onclick="exportData()">📥 Baixar Backup</button>
+            </div>
+
+            <div class="backup-section">
+                <h3>📤 Importar Dados</h3>
+                <p style="width: 100%; color: #aaa; margin-bottom: 10px;">Restaure seus dados a partir de um arquivo de backup. <strong>Atenção:</strong> Isso substituirá todos os dados atuais.</p>
+                <div class="file-input-wrapper">
+                    <button class="btn-import">📤 Escolher Arquivo</button>
+                    <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+                </div>
+            </div>
+
+            <div class="backup-section">
+                <h3>🗑️ Limpar Dados</h3>
+                <p style="width: 100%; color: #aaa; margin-bottom: 10px;">Remove todos os dados da aplicação. <strong>Use com cuidado!</strong></p>
+                <button class="delete-btn" onclick="clearAllData()">🗑️ Limpar Tudo</button>
+            </div>
+
+            <div class="alert">
+                💡 <strong>Dica:</strong> Faça backups mensais para não perder seus dados!
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
